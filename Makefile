@@ -6,7 +6,7 @@
 #    By: alelievr <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2014/07/15 15:13:38 by alelievr          #+#    #+#              #
-#    Updated: 2016/07/21 00:56:52 by alelievr         ###   ########.fr        #
+#    Updated: 2016/07/25 19:26:44 by alelievr         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -187,7 +187,7 @@ $(OBJDIR)/%.o: %.cpp $(INCFILES)
 $(OBJDIR)/%.o: %.c $(INCFILES)
 	@mkdir -p $(OBJDIR)
 	@$(call color_exec,$(COBJ_T),$(COBJ),"Object: $@",\
-		$(CC) $(WERROR) $(CFLAGS) $(OPTFLAGS) $(DEBUGFLAGS) $(CPPFLAGS) -o $@ -c $<)
+		$(CC) $(WERROR) $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) -o $@ -c $<)
 
 $(OBJDIR)/%.o: %.s
 	@mkdir -p $(OBJDIR)
