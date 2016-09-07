@@ -98,22 +98,7 @@ Can take a single image file where width = 6*height (or vice versa), split it in
 
 **Compiling:**
 ------------
-To generate project files you will need to [download and install](http://industriousone.com/premake/download) [Premake](http://industriousone.com/what-premake)
-
-Then you can generate the static library for your platform just going to the project directory where the premake4.lua file is located and then execute:
-
-`premake4 gmake` to generate project Makefiles, then `cd make/*YOURPLATFORM*/`, and finally `make` or `make config=release` ( it will generate the static lib, the shared lib and the test application ).
-
-or 
-
-`premake4 vs2010` to generate Visual Studio 2010 project.
-
-or
-
-`premake4 xcode4` to generate Xcode 4 project.
-
-The static library will be located in `lib/*YOURPLATFORM*/` folder project subdirectory.
-The test will be located in `bin`, you need [SDL 2](http://libsdl.org/) installed to be able to build the test.
+Just make
 
 **Usage:**
 ----------
