@@ -1730,7 +1730,13 @@ unsigned int
 			glTexParameteri( opengl_texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 			glTexParameteri( opengl_texture_type, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
 			check_for_GL_errors( "GL_TEXTURE_MIN/MAG_FILTER" );
-		} else
+		} else if ( flags & SOIL_FLAG_NEAREST && (flags & SOIL_FLAG_MIPMAPS || flags & SOIL_FLAG_GL_MIPMAPS)) {
+			glTexParameteri( opengl_texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST );
+			glTexParameteri( opengl_texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST );
+		} else if ( flags & SOIL_FLAG_NEAREST) {
+			glTexParameteri( opengl_texture_type, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexParameteri( opengl_texture_type, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		}else
 		{
 			/*	instruct OpenGL _NOT_ to use the MIPmaps	*/
 			glTexParameteri( opengl_texture_type, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
