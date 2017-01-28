@@ -15,7 +15,7 @@
 #################
 
 #	Sources
-SRCDIR		=	SOIL2
+SRCDIR		=	srcs
 SRC			=	SOIL2.c			\
 				etc1_utils.c	\
 				image_DXT.c		\
@@ -35,7 +35,7 @@ CPPVERSION	=	c++11
 #Example $> make DEBUG=2 will set debuglevel to 2
 
 #	Includes
-INCDIRS		=	SOIL2
+INCDIRS		=	incs
 
 #	Libraries
 LIBDIRS		=	
