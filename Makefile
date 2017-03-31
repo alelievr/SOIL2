@@ -87,16 +87,6 @@ LINKDEBUG	=	""
 OPTFLAGS	=	""
 #COMPILATION	=	""
 
-ifeq "$(OS)" "Windows_NT"
-endif
-ifeq "$(OS)" "Linux"
-	LDLIBS		+= ""
-	DEBUGFLAGS	+= " -fsanitize=memory -fsanitize-memory-use-after-dtor -fsanitize=thread"
-	FRAMEWORK	= ""
-endif
-ifeq "$(OS)" "Darwin"
-endif
-
 #################
 ##  AUTO       ##
 #################
@@ -158,6 +148,17 @@ ifdef ${NOWERROR}
 	WERROR = ""
 endif
 
+ifeq "$(OS)" "Windows_NT"
+endif
+ifeq "$(OS)" "Linux"
+	LDLIBS		+= ""
+	DEBUGFLAGS	+= " -fsanitize=memory -fsanitize-memory-use-after-dtor -fsanitize=thread"
+	FRAMEWORK	=
+endif
+ifeq "$(OS)" "Darwin"
+	INSTALL_NAME = -install_name $(CURRENT_DIR)/$(DYNAMIC_NAME)
+endif
+
 #################
 ##  TARGETS    ##
 #################
@@ -177,7 +178,7 @@ $(STATIC_NAME): $(OBJ)
 
 $(DYNAMIC_NAME): $(OBJ)
 	@$(call color_exec,$(CLINK_T),$(CLINK),"Link of $(DYNAMIC_NAME)",\
-		$(DYNAMIC_LINKER) -dynamiclib -shared -fPIC -install_name $(CURRENT_DIR)/$(DYNAMIC_NAME) -o $(DYNAMIC_NAME) $^ $(VFRAME))
+		$(DYNAMIC_LINKER) -dynamiclib -shared -fPIC $(INSTALL_NAME) -o $(DYNAMIC_NAME) $^ $(VFRAME))
 
 $(OBJDIR)/%.o: %.cpp $(INCFILES)
 	@mkdir -p $(OBJDIR)
