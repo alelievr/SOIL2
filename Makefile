@@ -114,6 +114,7 @@ CPPFLAGS	=	$(addprefix -I,$(INCDIRS))
 LDFLAGS		=	$(addprefix -L,$(LIBDIRS))
 STATIC_LINKER=	ar rc
 DYNAMIC_LINKER=	$(CC)
+CURRENT_DIR	= $(shell pwd)
 
 disp_indent	=	for I in `seq 1 $(MAKELEVEL)`; do \
 					test "$(MAKELEVEL)" '!=' '0' && printf "\t"; \
@@ -150,7 +151,7 @@ ifndef $(CXX)
 endif
 
 ifneq ($(filter %.cpp,$(SRC)),)
-	LINKER = ar rc
+	STATIC_LINKER = ar rc
 endif
 
 ifdef ${NOWERROR}
@@ -171,12 +172,12 @@ static: $(STATIC_NAME)
 #	Linking
 $(STATIC_NAME): $(OBJ)
 	@$(call color_exec,$(CLINK_T),$(CLINK),"Link of $(STATIC_NAME):",\
-		$(LINKER) $@ $^)
-	@ranlib $(NAME)
+		$(STATIC_LINKER) $@ $^)
+	@ranlib $(STATIC_NAME)
 
 $(DYNAMIC_NAME): $(OBJ)
 	@$(call color_exec,$(CLINK_T),$(CLINK),"Link of $(DYNAMIC_NAME)",\
-		$(DYNAMIC_LINKER) -shared -fPIC -o $(DYNAMIC_NAME) $^ $(VFRAME))
+		$(DYNAMIC_LINKER) -dynamiclib -shared -fPIC -install_name $(CURRENT_DIR)/$(DYNAMIC_NAME) -o $(DYNAMIC_NAME) $^ $(VFRAME))
 
 $(OBJDIR)/%.o: %.cpp $(INCFILES)
 	@mkdir -p $(OBJDIR)
@@ -203,7 +204,7 @@ clean:
 #	Removing objects and exe
 fclean: clean
 	@$(call color_exec,$(CCLEAN_T),$(CCLEAN),"Fclean:",\
-		$(RM) $(NAME))
+		$(RM) $(STATIC_NAME) $(DYNAMIC_NAME))
 
 #	All removing then compiling
 re: fclean all
@@ -214,15 +215,8 @@ f:	all run
 norme:
 	@norminette $(NORME) | sed "s/Norme/[38;5;$(CNORM_T)➤ [38;5;$(CNORM_OK)Norme/g;s/Warning/[0;$(CNORM_WARN)Warning/g;s/Error/[0;$(CNORM_ERR)Error/g"
 
-run: $(NAME)
-	@echo $(CRUN_T)"➤ "$(CRUN)"./$(NAME) ${ARGS}\033[0m"
-	@./$(NAME) ${ARGS}
-
 codesize:
 	@cat $(NORME) |grep -v '/\*' |wc -l
-
-functions: $(NAME)
-	@nm $(NAME) | grep U
 
 coffee:
 	@clear
