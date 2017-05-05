@@ -25,7 +25,6 @@ SRC			=	SOIL2.c			\
 OBJDIR		=	obj
 
 #	Variables
-LIBFT		=	2	#1 or 0 to include the libft / 2 for autodetct
 DEBUGLEVEL	=	0	#can be 0 for no debug 1 for or 2 for harder debug
 					#Warrning: non null debuglevel will disable optlevel
 OPTLEVEL	=	1	#same than debuglevel
@@ -42,11 +41,12 @@ LIBDIRS		=
 LDLIBS		=	
 
 #	Output
-NAME		=	libSOIL2.a
+STATIC_NAME	=	libSOIL2.a
+DYNAMIC_NAME=	libSOIL2.so
 
 #	Compiler
 WERROR		=	-Werror
-CFLAGS		=	#-Weverything -pedantic
+CFLAGS		=	-fPIC
 CPROTECTION	=	-z execstack -fno-stack-protector
 
 DEBUGFLAGS1	=	-ggdb -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls -O0
@@ -55,7 +55,7 @@ OPTFLAGS1	=	-funroll-loops -O2
 OPTFLAGS2	=	-pipe -funroll-loops -Ofast
 
 #	Framework
-FRAMEWORK	=	
+FRAMEWORK	=	OpenGL Cocoa
 
 #################
 ##  COLORS     ##
@@ -92,6 +92,7 @@ endif
 ifeq "$(OS)" "Linux"
 	LDLIBS		+= ""
 	DEBUGFLAGS	+= " -fsanitize=memory -fsanitize-memory-use-after-dtor -fsanitize=thread"
+	FRAMEWORK	= ""
 endif
 ifeq "$(OS)" "Darwin"
 endif
@@ -111,7 +112,8 @@ VFRAME		=	$(addprefix -framework ,$(FRAMEWORK))
 INCFILES	=	$(foreach inc, $(INCDIRS), $(wildcard $(inc)/*.h))
 CPPFLAGS	=	$(addprefix -I,$(INCDIRS))
 LDFLAGS		=	$(addprefix -L,$(LIBDIRS))
-LINKER		=	ar rc
+STATIC_LINKER=	ar rc
+DYNAMIC_LINKER=	$(CC)
 
 disp_indent	=	for I in `seq 1 $(MAKELEVEL)`; do \
 					test "$(MAKELEVEL)" '!=' '0' && printf "\t"; \
@@ -155,28 +157,26 @@ ifdef ${NOWERROR}
 	WERROR = ""
 endif
 
-ifeq "$(strip $(LIBFT))" "2"
-ifneq ($(wildcard ./libft),)
-	LIBDIRS += "libft"
-	LDLIBS += "-lft"
-	INCDIRS += "libft"
-endif
-endif
-
 #################
 ##  TARGETS    ##
 #################
 
 #	First target
-all: $(NAME)
+all: dynamic static
+
+dynamic: $(DYNAMIC_NAME)
+
+static: $(STATIC_NAME)
 
 #	Linking
-$(NAME): $(OBJ)
-	@$(if $(findstring lft,$(LDLIBS)),$(call color_exec_t,$(CCLEAR),$(CCLEAR),\
-		make -j 4 -C libft))
-	@$(call color_exec,$(CLINK_T),$(CLINK),"Link of $(NAME):",\
+$(STATIC_NAME): $(OBJ)
+	@$(call color_exec,$(CLINK_T),$(CLINK),"Link of $(STATIC_NAME):",\
 		$(LINKER) $@ $^)
 	@ranlib $(NAME)
+
+$(DYNAMIC_NAME): $(OBJ)
+	@$(call color_exec,$(CLINK_T),$(CLINK),"Link of $(DYNAMIC_NAME)",\
+		$(DYNAMIC_LINKER) -shared -fPIC -o $(DYNAMIC_NAME) $^ $(VFRAME))
 
 $(OBJDIR)/%.o: %.cpp $(INCFILES)
 	@mkdir -p $(OBJDIR)
