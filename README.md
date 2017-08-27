@@ -4,6 +4,8 @@ Simple OpenGL Image Library 2
 **Introduction:**
 --------------
 
+this version of **SOIL2** is a fork from Martín Lucas Golini's [SOIL2](https://bitbucket.org/SpartanJ/soil2)
+
 **SOIL2** is a fork of the Jonathan Dummer's [Simple OpenGL Image Library](http://www.lonesock.net/soil.html). 
 
 **SOIL2** is a tiny C library used primarily for uploading textures into OpenGL.

@@ -113,6 +113,7 @@
 #include "image_DXT.h"
 #include "pvr_helper.h"
 #include "pkm_helper.h"
+#include "jo_jpeg.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -1887,6 +1888,7 @@ unsigned char*
 	return result;
 }
 
+
 int
 	SOIL_save_image
 	(
@@ -1894,6 +1896,19 @@ int
 		int image_type,
 		int width, int height, int channels,
 		const unsigned char *const data
+	)
+{
+	return SOIL_save_image_quality( filename, image_type, width, height, channels, data, 80 );
+}
+
+int
+	SOIL_save_image_quality
+	(
+		const char *filename,
+		int image_type,
+		int width, int height, int channels,
+		const unsigned char *const data,
+		int quality
 	)
 {
 	int save_result;
@@ -1926,6 +1941,11 @@ int
 		save_result = stbi_write_png( filename,
 				width, height, channels, (const unsigned char *const)data, 0 );
 	} else
+	if ( image_type == SOIL_SAVE_TYPE_JPG )
+	{
+		save_result = jo_write_jpg( filename, (const void*)data, width, height, channels, quality );
+	}
+	else
 	{
 		save_result = 0;
 	}
@@ -2102,23 +2122,13 @@ unsigned int SOIL_direct_load_DDS_from_memory(
 	}
 	if( (header.sCaps.dwCaps1 & DDSCAPS_MIPMAP) && (header.dwMipMapCount > 1) )
 	{
-		int shift_offset;
 		mipmaps = header.dwMipMapCount - 1;
 		DDS_full_size = DDS_main_size;
-		if( uncompressed )
-		{
-			/*	uncompressed DDS, simple MIPmap size calculation	*/
-			shift_offset = 0;
-		} else
-		{
-			/*	compressed DDS, MIPmap size calculation is block based	*/
-			shift_offset = 2;
-		}
 		for( i = 1; i <= mipmaps; ++ i )
 		{
 			int w, h;
-			w = width >> (shift_offset + i);
-			h = height >> (shift_offset + i);
+			w = width >> i;
+			h = height >> i;
 			if( w < 1 )
 			{
 				w = 1;
@@ -2127,7 +2137,15 @@ unsigned int SOIL_direct_load_DDS_from_memory(
 			{
 				h = 1;
 			}
-			DDS_full_size += w*h*block_size;
+			if ( uncompressed )
+			{
+				/*	uncompressed DDS, simple MIPmap size calculation	*/
+				DDS_full_size += w*h*block_size;
+			} else
+			{
+				/*	compressed DDS, MIPmap size calculation is block based	*/
+				DDS_full_size += ((w+3)/4)*((h+3)/4)*block_size;
+			}
 		}
 	} else
 	{
@@ -2775,6 +2793,10 @@ int query_NPOT_capability( void )
 			/*	it's there!	*/
 			has_NPOT_capability = SOIL_CAPABILITY_PRESENT;
 		}
+
+		#if defined( __emscripten__ ) || defined( EMSCRIPTEN )
+		has_NPOT_capability = SOIL_CAPABILITY_PRESENT;
+		#endif
 	}
 	/*	let the user know if we can do non-power-of-two textures or not	*/
 	return has_NPOT_capability;
@@ -3016,6 +3038,15 @@ int query_gen_mipmap_capability( void )
 			if(ext_addr == NULL)
 			{
 				ext_addr = (P_SOIL_GLGENERATEMIPMAPPROC)SOIL_GL_GetProcAddress("glGenerateMipmapEXT");
+			}
+
+			#elif !defined( SOIL_NO_EGL )
+
+			ext_addr = (P_SOIL_GLGENERATEMIPMAPPROC)SOIL_GL_GetProcAddress("glGenerateMipmapOES");
+
+			if(ext_addr == NULL)
+			{
+				ext_addr = (P_SOIL_GLGENERATEMIPMAPPROC)SOIL_GL_GetProcAddress("glGenerateMipmap");
 			}
 
 			#elif defined( SOIL_GLES2 )
