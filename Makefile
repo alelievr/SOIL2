@@ -156,6 +156,7 @@ ifeq "$(OS)" "Linux"
 	FRAMEWORK	=
 endif
 ifeq "$(OS)" "Darwin"
+	CFLAGS += -DGL_SILENCE_DEPRECATION
 	INSTALL_NAME = -install_name $(CURRENT_DIR)/$(DYNAMIC_NAME)
 endif
 
